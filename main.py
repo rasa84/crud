@@ -1,9 +1,12 @@
+import fnmatch
+import re
+
 cat_breeds = [
     [
         "Abyssinian",
         6,
         10,
-        ["Ruddy", "red", "blue", "fawn"],
+        ["Ruddy", "bright red", "blue", "fawn"],
     ],
     [
         "Bengal",
@@ -27,7 +30,8 @@ def print_info():
     print("2. Add new breed")
     print("3. Edit breed")
     print("4. Remove breed")
-    print("5. Exit")
+    print("5. Filter breeds")
+    print("6. Exit")
     print("*****************************************************")
 
 
@@ -38,9 +42,9 @@ def print_breed(breed, num):
     print(f"{num}. Cat breed name: {breed[0]}. Weight: {breed[1]}-{breed[2]}. Colours: {colour[:-2]}.")
 
 
-def print_breeds():
+def print_breeds(breeds=cat_breeds):
     count = 1
-    for b in cat_breeds:
+    for b in breeds:
         print_breed(b, count)
         count += 1
 
@@ -71,6 +75,33 @@ def remove_breed():
     cat_breeds.pop(num - 1)
 
 
+def filter_breed():
+    opt = int(input("Enter number: 1 - filter by breed's name, 2 - filter by weight, 3 - filter by colour: "))
+    search_criteria = input("Enter search criteria: ")
+    filtered_breeds = []
+    match opt:
+        case 1:
+            breed_name = "^" + search_criteria.lower().replace("*", ".*") + "$"
+            regex = re.compile(breed_name)
+            for breed in cat_breeds:
+                if re.match(regex, breed[0].lower()):
+                    filtered_breeds.append(breed)
+        case 2:
+            weight = int(search_criteria)
+            for breed in cat_breeds:
+                if breed[1] <= weight <= breed[2]:
+                    filtered_breeds.append(breed)
+        case 3:
+            for breed in cat_breeds:
+                if fnmatch.filter(breed[3], search_criteria):
+                    filtered_breeds.append(breed)
+    if len(filtered_breeds) > 0:
+        print("Found these breeds: ")
+        print_breeds(sorted(filtered_breeds, key=lambda x: x[0]))
+    else:
+        print("There are no breeds under your search criteria")
+
+
 print("***********************CAT BREEDS CATALOG**********************************")
 
 while True:
@@ -89,4 +120,6 @@ while True:
             remove_breed()
             print_breeds()
         case 5:
+            filter_breed()
+        case 6:
             exit(1)
